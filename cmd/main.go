@@ -13,17 +13,19 @@ import (
 
 func main() {
 	// input := "[file:hashes.'SHA-256' = '56cca56e39431187a2bd95e53eece8f11d3cbe2ea7ee692fa891875f40f233f5']"
+	// input := "[file:hashes.'sha1' = '0011e13490dac077425863667eeaa97bb40449cf2d5752dc0b010c82200a0720']"
+	input := "[file:hashes.'md5' = 'd41d8cd98f00b204e9800998ecf8427e']"
 	// input := "[(directory:path MATCHES '^C:\\\\Windows\\\\w+$') OR (file:parent_directory_ref.path = 'C:\\\\Windows\\\\System32')]"
 	// GG input := "[[directory:path MATCHES '^C:\\\\Windows\\\\w+$'] OR [file:parent_directory_ref.path = 'C:\\\\Windows\\\\System32']]"
-	input := "[file:name = 'abc.exe'] AND [file:parent_directory_ref.path = 'C:\\\\Windows\\\\System32']"
+	// input := "[file:name = 'abc.exe'] AND [file:parent_directory_ref.path = 'C:\\\\Windows\\\\System32']"
 	// input := " [file:name = 'abc.exe'] AND [ file:name = 'cc']"
 	// input := " [ file:name = 'abcd.exe' AND file:name = 'abc.exe'] "
 	// input := " [file:name = 'abc.exe']"
 
-	getYara(input)
+	printYara(input)
 }
 
-func getYara(s string) {
+func printYara(s string) {
 
 	// Setup the input
 	is := antlr.NewInputStream(s)
@@ -37,18 +39,14 @@ func getYara(s string) {
 	p.AddErrorListener(antlr.NewDiagnosticErrorListener(true))
 	p.BuildParseTrees = true
 	tree := p.Pattern()
-	// Finally parse the expression (by walking the tree)
+
+	// Finally parse the expression by walking the tree
 	var listener PocListener
 	antlr.ParseTreeWalkerDefault.Walk(&listener, tree)
 	root := listener.expressionNode
-	fmt.Println(root.Type)
+
 	forEachNode(root)
-	// printFilePathYara(&listener)
-	// fmt.Println(listener.expressions)
-	// stk := listener.GetStack()
-	// for _, v := range stk {
-	// 	fmt.Println(v)
-	// }
+
 }
 
 func forEachNode(n *ExpressionNode) {
@@ -63,15 +61,19 @@ func forEachNode(n *ExpressionNode) {
 		}
 
 	} else {
-		fmt.Println(
-			fmt.Sprintf(
-				"%s - %s:%s %s %s",
-				n.Type,
-				n.Data.Object,
-				n.Data.NestedProperty,
-				n.Data.Operator,
-				n.Data.Value,
-			))
+		ok := handleFileChecksum(n)
+		if !ok {
+			fmt.Println(
+				fmt.Sprintf(
+					"%s - %s:%s %s %s",
+					n.Type,
+					n.Data.Object,
+					n.Data.NestedProperty,
+					n.Data.Operator,
+					n.Data.Value,
+				))
+		}
+
 	}
 }
 
@@ -79,7 +81,29 @@ func handleFileChecksum(n *ExpressionNode) bool {
 	if n.Type == NODETYPE &&
 		n.Data.Object == "file" {
 		data := n.Data
-		if data.NestedProperty ==
+		prop := strings.ToLower(data.NestedProperty)
+		if prop == "hashes.'sha-256'" || prop == "hashes.'sha1'" || prop == "hashes.'md5'" {
+			val := strings.ReplaceAll(data.Value, "'", "")
+			var buffer bytes.Buffer
+			buffer.WriteString("import \"hash\"\n")
+			buffer.WriteString("\n")
+			buffer.WriteString("rule poc {\n")
+			buffer.WriteString("  condition:\n")
+			switch prop {
+			case "hashes.'sha-256'":
+				buffer.WriteString("     hash.sha256(0, filesize) == \"" + val + "\"\n")
+			case "hashes.'sha1'":
+				buffer.WriteString("     hash.sha1(0, filesize) == \"" + val + "\"\n")
+			case "hashes.'md5'":
+				buffer.WriteString("     hash.md5(0, filesize) == \"" + val + "\"\n")
+
+			}
+
+			buffer.WriteString("}\n")
+
+			fmt.Println(buffer.String())
+			return true
+		}
 	}
 	return false
 }

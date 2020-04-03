@@ -13,6 +13,10 @@ const (
 	JOINTYPE string = "JOIN"
 	// NODETYPE - termial node
 	NODETYPE string = "NODE"
+	// DEBUGENTER -
+	DEBUGENTER bool = false
+	// DEBUGEXIT -
+	DEBUGEXIT bool = false
 )
 
 // PocListener -
@@ -187,8 +191,10 @@ func (s *PocListener) addExpression2() {
 				n = s.getNode()
 				continue
 			}
+			if DEBUGEXIT {
+				fmt.Println(n.Text)
+			}
 
-			fmt.Println(n.Text)
 			if flag == 0 {
 				if n.TokenType == parser.STIXPatternLexerEQ && n.Text == "=" {
 					exp.Operator = n.Text
@@ -250,30 +256,39 @@ func (s *PocListener) addExpression() {
 
 // VisitTerminal is called when a terminal node is visited.
 func (s *PocListener) VisitTerminal(node antlr.TerminalNode) {
-	fmt.Println("== VisitTerminal ==")
+	if DEBUGEXIT {
+		fmt.Println("== VisitTerminal ==")
+	}
 	if node.GetSymbol().GetTokenType() != antlr.TokenEOF {
 		s.push(&NodeType{node.GetText(), node.GetSymbol().GetTokenType()})
 	}
-	fmt.Println(node.GetText())
+	if DEBUGEXIT {
+		fmt.Println(node.GetText())
+	}
 	// fmt.Println(node.GetSymbol().GetTokenType())
 
 }
 
 // VisitErrorNode is called when an error node is visited.
 func (s *PocListener) VisitErrorNode(node antlr.ErrorNode) {
-	fmt.Println("== VisitErrorNode ==")
-	// panic("ErrorNode")
+	if DEBUGENTER {
+		fmt.Println("== VisitErrorNode ==")
+	}
+	// panic("ErrorNode") <= handle error input here
 }
 
 // EnterObservationExpressions is called when production observationExpressions is entered.
 func (s *PocListener) EnterObservationExpressions(ctx *parser.ObservationExpressionsContext) {
-	fmt.Println("== EnterObservationExpressions ==")
-	// s.push(&PocType{"<S>", -1})
+	if DEBUGENTER {
+		fmt.Println("== EnterObservationExpressions ==")
+	}
 }
 
 // ExitObservationExpressions is called when production observationExpressions is exited.
 func (s *PocListener) ExitObservationExpressions(ctx *parser.ObservationExpressionsContext) {
-	fmt.Println("== ExitObservationExpressions ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitObservationExpressions ==")
+	}
 
 }
 
@@ -284,7 +299,9 @@ func (s *PocListener) EnterEveryRule(ctx antlr.ParserRuleContext) {
 
 // ExitEveryRule is called when any rule is exited.
 func (s *PocListener) ExitEveryRule(ctx antlr.ParserRuleContext) {
-	// fmt.Println("== ExitEveryRule ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== ExitEveryRule ==")
+	}
 }
 
 // EnterPattern is called when production pattern is entered.
@@ -294,163 +311,219 @@ func (s *PocListener) EnterPattern(ctx *parser.PatternContext) {
 
 // ExitPattern is called when production pattern is exited.
 func (s *PocListener) ExitPattern(ctx *parser.PatternContext) {
-	// fmt.Println("== ExitPattern ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitPattern ==")
+	}
 }
 
 // EnterObservationExpressionOr is called when production observationExpressionOr is entered.
 func (s *PocListener) EnterObservationExpressionOr(ctx *parser.ObservationExpressionOrContext) {
-	fmt.Println("== EnterObservationExpressionOr ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterObservationExpressionOr ==")
+	}
 
 }
 
 // ExitObservationExpressionOr is called when production observationExpressionOr is exited.
 func (s *PocListener) ExitObservationExpressionOr(ctx *parser.ObservationExpressionOrContext) {
-	fmt.Println("== ExitObservationExpressionOr ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitObservationExpressionOr ==")
+	}
 	s.addExpression()
 }
 
 // EnterObservationExpressionAnd is called when production observationExpressionAnd is entered.
 func (s *PocListener) EnterObservationExpressionAnd(ctx *parser.ObservationExpressionAndContext) {
-	fmt.Println("== EnterObservationExpressionAnd ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterObservationExpressionAnd ==")
+	}
 
 }
 
 // ExitObservationExpressionAnd is called when production observationExpressionAnd is exited.
 func (s *PocListener) ExitObservationExpressionAnd(ctx *parser.ObservationExpressionAndContext) {
-	fmt.Println("== ExitObservationExpressionAnd ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitObservationExpressionAnd ==")
+	}
 	s.addExpression()
 }
 
 // EnterObservationExpressionRepeated is called when production observationExpressionRepeated is entered.
 func (s *PocListener) EnterObservationExpressionRepeated(ctx *parser.ObservationExpressionRepeatedContext) {
-	fmt.Println("== EnterObservationExpressionRepeated ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterObservationExpressionRepeated ==")
+	}
 
 }
 
 // ExitObservationExpressionRepeated is called when production observationExpressionRepeated is exited.
 func (s *PocListener) ExitObservationExpressionRepeated(ctx *parser.ObservationExpressionRepeatedContext) {
-	fmt.Println("== ExitObservationExpressionRepeated ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitObservationExpressionRepeated ==")
+	}
 	s.addExpression()
 }
 
 // EnterObservationExpressionSimple is called when production observationExpressionSimple is entered.
 func (s *PocListener) EnterObservationExpressionSimple(ctx *parser.ObservationExpressionSimpleContext) {
-	fmt.Println("== EnterObservationExpressionSimple ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterObservationExpressionSimple ==")
+	}
 
 }
 
 // ExitObservationExpressionSimple is called when production observationExpressionSimple is exited.
 func (s *PocListener) ExitObservationExpressionSimple(ctx *parser.ObservationExpressionSimpleContext) {
-	fmt.Println("== ExitObservationExpressionSimple ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitObservationExpressionSimple ==")
+	}
 	s.addExpression()
 }
 
 // EnterObservationExpressionCompound is called when production observationExpressionCompound is entered.
 func (s *PocListener) EnterObservationExpressionCompound(ctx *parser.ObservationExpressionCompoundContext) {
-	fmt.Println("== EnterObservationExpressionCompound ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterObservationExpressionCompound ==")
+	}
 
 }
 
 // ExitObservationExpressionCompound is called when production observationExpressionCompound is exited.
 func (s *PocListener) ExitObservationExpressionCompound(ctx *parser.ObservationExpressionCompoundContext) {
-	fmt.Println("== ExitObservationExpressionCompound ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitObservationExpressionCompound ==")
+	}
 	s.addExpression()
 }
 
 // EnterObservationExpressionWithin is called when production observationExpressionWithin is entered.
 func (s *PocListener) EnterObservationExpressionWithin(ctx *parser.ObservationExpressionWithinContext) {
-	fmt.Println("== EnterObservationExpressionWithin ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterObservationExpressionWithin ==")
+	}
 
 }
 
 // ExitObservationExpressionWithin is called when production observationExpressionWithin is exited.
 func (s *PocListener) ExitObservationExpressionWithin(ctx *parser.ObservationExpressionWithinContext) {
-	fmt.Println("== ExitObservationExpressionWithin ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitObservationExpressionWithin ==")
+	}
 	s.addExpression()
 }
 
 // EnterObservationExpressionStartStop is called when production observationExpressionStartStop is entered.
 func (s *PocListener) EnterObservationExpressionStartStop(ctx *parser.ObservationExpressionStartStopContext) {
-	fmt.Println("== EnterObservationExpressionStartStop ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterObservationExpressionStartStop ==")
+	}
 
 }
 
 // ExitObservationExpressionStartStop is called when production observationExpressionStartStop is exited.
 func (s *PocListener) ExitObservationExpressionStartStop(ctx *parser.ObservationExpressionStartStopContext) {
-	fmt.Println("== ExitObservationExpressionStartStop ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitObservationExpressionStartStop ==")
+	}
 	s.addExpression()
 }
 
 // EnterComparisonExpression is called when production comparisonExpression is entered.
 func (s *PocListener) EnterComparisonExpression(ctx *parser.ComparisonExpressionContext) {
-	fmt.Println("== EnterComparisonExpression ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterComparisonExpression ==")
+	}
 
 }
 
 // ExitComparisonExpression is called when production comparisonExpression is exited.
 func (s *PocListener) ExitComparisonExpression(ctx *parser.ComparisonExpressionContext) {
-	fmt.Println("== ExitComparisonExpression ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitComparisonExpression ==")
+	}
 	s.addExpression()
 }
 
 // EnterComparisonExpressionAnd is called when production comparisonExpressionAnd is entered.
 func (s *PocListener) EnterComparisonExpressionAnd(ctx *parser.ComparisonExpressionAndContext) {
-	fmt.Println("== EnterComparisonExpressionAnd ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterComparisonExpressionAnd ==")
+	}
 
 }
 
 // ExitComparisonExpressionAnd is called when production comparisonExpressionAnd is exited.
 func (s *PocListener) ExitComparisonExpressionAnd(ctx *parser.ComparisonExpressionAndContext) {
-	fmt.Println("== ExitComparisonExpressionAnd ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitComparisonExpressionAnd ==")
+	}
 	s.addExpression()
 }
 
 // EnterPropTestEqual is called when production propTestEqual is entered.
 func (s *PocListener) EnterPropTestEqual(ctx *parser.PropTestEqualContext) {
-	fmt.Println("== EnterPropTestEqual ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterPropTestEqual ==")
+	}
 
 }
 
 // ExitPropTestEqual is called when production propTestEqual is exited.
 func (s *PocListener) ExitPropTestEqual(ctx *parser.PropTestEqualContext) {
-	fmt.Println("== ExitPropTestEqual ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitPropTestEqual ==")
+	}
 }
 
 // EnterPropTestOrder is called when production propTestOrder is entered.
 func (s *PocListener) EnterPropTestOrder(ctx *parser.PropTestOrderContext) {
-	fmt.Println("== EnterPropTestOrder ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterPropTestOrder ==")
+	}
 
 }
 
 // ExitPropTestOrder is called when production propTestOrder is exited.
 func (s *PocListener) ExitPropTestOrder(ctx *parser.PropTestOrderContext) {
-	fmt.Println("== ExitPropTestOrder ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitPropTestOrder ==")
+	}
 }
 
 // EnterPropTestSet is called when production propTestSet is entered.
 func (s *PocListener) EnterPropTestSet(ctx *parser.PropTestSetContext) {
-	fmt.Println("== EnterPropTestSet ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterPropTestSet ==")
+	}
 
 }
 
 // ExitPropTestSet is called when production propTestSet is exited.
 func (s *PocListener) ExitPropTestSet(ctx *parser.PropTestSetContext) {
-	fmt.Println("== ExitPropTestSet ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitPropTestSet ==")
+	}
 }
 
 // EnterPropTestLike is called when production propTestLike is entered.
 func (s *PocListener) EnterPropTestLike(ctx *parser.PropTestLikeContext) {
-	fmt.Println("== EnterPropTestLike ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterPropTestLike ==")
+	}
 
 }
 
 // ExitPropTestLike is called when production propTestLike is exited.
 func (s *PocListener) ExitPropTestLike(ctx *parser.PropTestLikeContext) {
-	fmt.Println("== ExitPropTestLike ==")
+	if DEBUGEXIT {
+		fmt.Println("== ExitPropTestLike ==")
+	}
 }
 
 // EnterPropTestRegex is called when production propTestRegex is entered.
 func (s *PocListener) EnterPropTestRegex(ctx *parser.PropTestRegexContext) {
-	fmt.Println("== EnterPropTestRegex ==")
+	if DEBUGEXIT && DEBUGENTER {
+		fmt.Println("== EnterPropTestRegex ==")
+	}
 
 }
